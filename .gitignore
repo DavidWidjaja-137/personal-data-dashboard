@@ -1,0 +1,6 @@
+metadata/*
+data/*
+__pycache__/
+**/__pycache/
+
+.DS_Store
