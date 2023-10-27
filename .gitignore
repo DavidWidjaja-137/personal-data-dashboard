@@ -4,3 +4,6 @@ __pycache__/
 **/__pycache/
 
 .DS_Store
+
+!data/readme.md
+!metadata/readme.md
