@@ -41,17 +41,6 @@ def plot_category_waterfall(cd: dict[FinancialCategory, float]) -> go.Figure:
         y = values
     ))
 
-def plot_balance_over_time(
-    classified_transactions: list[FinancialTransaction],
-    data_start: datetime,
-    data_end: datetime,
-    delta: relativedelta) -> go.Figure:
-
-    balance_over_time = transaction_aggregator.get_balance_over_time(classified_transactions, data_start, data_end, delta)
-    time = [t for t, b in balance_over_time]
-    balance = [b for t, b in balance_over_time]
-
-    return go.Figure(go.Scatter(x=time, y=balance))
 
 def plot_all_categories_over_time(
     classified_transactions: list[FinancialTransaction],
@@ -132,7 +121,7 @@ def plot_subcategory_over_time_bar(
 
     fig = go.Figure()
 
-    for k, category_over_time in category_over_time_dict.items():
+    for k, category_over_time in sorted([(k, v) for k, v in category_over_time_dict.items()], key=lambda x: x[0].name):
         time = [t for t, b in category_over_time]
         kpi = [b for t, b in category_over_time]
 
@@ -144,6 +133,22 @@ def plot_subcategory_over_time_bar(
     time = [t for t, b in balance_over_time]
     balance = [b for t, b in balance_over_time]
     fig.add_trace(go.Scatter(x=time, y=balance, name="Balance"))
-
     
+    return fig
+
+
+def plot_asset_growth_over_time(
+    classified_transactions: list[FinancialTransaction],
+    data_start: datetime,
+    data_end: datetime,   
+) -> go.Figure:
+    
+    asset_growth_over_time = transaction_aggregator.get_daily_asset_growth_over_time(classified_transactions, data_start, data_end)
+
+    fig = go.Figure()
+
+    time = [t for t, b in asset_growth_over_time]
+    balance = [b for t, b in asset_growth_over_time]
+    fig.add_trace(go.Scatter(x=time, y=balance, name="Balance"))
+
     return fig

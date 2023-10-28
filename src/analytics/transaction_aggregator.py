@@ -9,6 +9,7 @@ from analytics.local_dataclasses import(
     FinancialSubcategory,
     FinancialTransactionType
 )
+from analytics.utils import aggregate_by_day
 
 balance_key_list = [
     FinancialCategory.INCOME, FinancialCategory.LEARNING, FinancialCategory.BANKING, 
@@ -159,3 +160,26 @@ def get_subcategory_over_time(
         start = start + delta
 
     return dict_of_lists
+
+
+def get_daily_asset_growth_over_time(
+    classified_transactions: list[FinancialTransaction],
+    data_start: datetime,
+    data_end: datetime,
+) -> list[tuple[datetime, float]]:
+    
+    # turn daily transactions
+    daily_transactions: list[tuple[datetime, float]] = []
+    for t in classified_transactions:
+        value = t.amount_cad if t.transaction_type == FinancialTransactionType.INFLOW else -1 * t.amount_cad
+        daily_transactions.append((t.date, value))
+
+    daily_transactions = aggregate_by_day(daily_transactions)
+
+    cumulative_sum = 0.0
+    asset_growth_over_time: list[tuple[datetime, float]] = []
+    for d, v in daily_transactions:
+        cumulative_sum += v
+        asset_growth_over_time.append((d, cumulative_sum))
+
+    return asset_growth_over_time

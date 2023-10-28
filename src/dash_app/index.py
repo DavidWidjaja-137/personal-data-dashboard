@@ -38,6 +38,7 @@ date_picker = dcc.DatePickerRange(
 )
 
 view_picker_display_options = [
+    "Asset Growth over Time Line Chart",
     "Monthly Categories Bar Chart",
     "Monthly Subcategories Bar Chart",
     "Expenditure Categories Pie Chart",
@@ -46,7 +47,8 @@ view_picker_display_options = [
     "Transactions Table",
     "Monthly kWh Bar Chart",
     "Daily kWh Line Chart",
-    "Month to Month kWh Comparison Line Chart"
+    "Month to Month kWh Comparison Line Chart",
+    "Week to Week kWh Comparison Line Chart"
 ]
 
 view_picker_dropdown = dcc.Dropdown(
@@ -76,6 +78,14 @@ view_section = html.Div(
     }
 )
 
+height_slider = dcc.Slider(
+    value=500,
+    min=400,
+    max=900,
+    step=100,
+    id='height-slider'
+)
+
 selectors = html.Div(
     children=[
         date_picker,
@@ -93,6 +103,7 @@ layout = html.Div(
     children=[
         title_banner,
         selectors,
+        height_slider,
         view_section
     ],
     style={
@@ -138,11 +149,12 @@ def render_transactions_table(classified_transactions: list[FinancialTransaction
 @callback(
     Output('view-section', 'children'),
     Input('load-view-button', 'n_clicks'),
+    Input('height-slider', 'value'),
     State('date-picker', 'start_date'),
     State('date-picker', 'end_date'),
     State('view-picker-dropdown', 'value')
 )
-def update_figures(n_click, start_date_str, end_date_str, value):
+def update_figures(n_click, height, start_date_str, end_date_str, value):
 
     data_start = datetime.fromisoformat(start_date_str)
     data_end = datetime.fromisoformat(end_date_str)
@@ -156,38 +168,54 @@ def update_figures(n_click, start_date_str, end_date_str, value):
 
     if value is None:
         return html.Div()
-
+    
     graph_or_tables = []
     for option in value:
 
         if option == 'Monthly Categories Bar Chart':
             fig = figure_plotter.plot_category_over_time_bar(classified_transactions, data_start, data_end, relativedelta(months=1))
-            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+            fig.update_layout(height=height)
+            graph_or_table = dcc.Graph(figure=fig, responsive='auto')
         elif option == 'Monthly Subcategories Bar Chart':
             fig = figure_plotter.plot_subcategory_over_time_bar(classified_transactions, data_start, data_end, relativedelta(months=1))
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Expenditure Categories Pie Chart':
             cd = transaction_aggregator.group_by_category(classified_transactions)
             fig = figure_plotter.plot_expenditures_category_pie_chart(cd)
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Expenditure Subcategories Pie Chart':
             csd = transaction_aggregator.group_by_subcategory(classified_transactions)
             fig = figure_plotter.plot_expenditures_subcategory_pie_chart(csd)
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Categories Waterfall':
             cd = transaction_aggregator.group_by_category(classified_transactions)
             fig = figure_plotter.plot_category_waterfall(cd)
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Transactions Table':
             graph_or_table = render_transactions_table(classified_transactions)
         elif option == 'Monthly kWh Bar Chart':
             fig = kwh_series_figure_plotter.plot_bar_chart_of_monthly_kwh_series(data_start, data_end)
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Daily kWh Line Chart':
             fig = kwh_series_figure_plotter.plot_line_chart_of_daily_kwh_series(data_start, data_end)
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Month to Month kWh Comparison Line Chart':
             fig = kwh_series_figure_plotter.plot_month_to_month_comparison_of_daily_kwh_series(data_start, data_end)
+            fig.update_layout(height=height)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+        elif option == "Week to Week kWh Comparison Line Chart":
+            fig = kwh_series_figure_plotter.plot_week_to_week_comparison_of_daily_kwh_series(data_start, data_end)
+            fig.update_layout(height=height)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+        elif option == "Asset Growth over Time Line Chart":
+            fig = figure_plotter.plot_asset_growth_over_time(classified_transactions, data_start, data_end)
+            fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
 
 
