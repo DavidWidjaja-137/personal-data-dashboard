@@ -1,10 +1,11 @@
-metadata/*
-data/*
 __pycache__/
-**/__pycache/
 .ipynb_checkpoints/
 .DS_Store
+.terraform
+
 notebooks/*.csv
+metadata/*
+data/*
 
 !data/readme.md
 !metadata/readme.md
