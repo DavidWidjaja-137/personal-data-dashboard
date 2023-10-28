@@ -6,7 +6,13 @@ from dateutil.relativedelta import relativedelta
 
 from dash import Dash, html, dcc, State, Input, Output, callback
 from dash.dash_table import DataTable
-from analytics import transaction_reader, transaction_classifier, transaction_aggregator, figure_plotter
+from analytics import (
+    transaction_reader,
+    transaction_classifier,
+    transaction_aggregator,
+    figure_plotter,
+    kwh_series_figure_plotter
+)
 from analytics.local_dataclasses import FinancialTransaction, FinancialTransactionType
 
 app = Dash(__name__)
@@ -37,7 +43,10 @@ view_picker_display_options = [
     "Expenditure Categories Pie Chart",
     "Expenditure Subcategories Pie Chart",
     "Categories Waterfall",
-    "Transactions Table"
+    "Transactions Table",
+    "Monthly kWh Bar Chart",
+    "Daily kWh Line Chart",
+    "Month to Month kWh Comparison Line Chart"
 ]
 
 view_picker_dropdown = dcc.Dropdown(
@@ -171,6 +180,16 @@ def update_figures(n_click, start_date_str, end_date_str, value):
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Transactions Table':
             graph_or_table = render_transactions_table(classified_transactions)
+        elif option == 'Monthly kWh Bar Chart':
+            fig = kwh_series_figure_plotter.plot_bar_chart_of_monthly_kwh_series(data_start, data_end)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+        elif option == 'Daily kWh Line Chart':
+            fig = kwh_series_figure_plotter.plot_line_chart_of_daily_kwh_series(data_start, data_end)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+        elif option == 'Month to Month kWh Comparison Line Chart':
+            fig = kwh_series_figure_plotter.plot_month_to_month_comparison_of_daily_kwh_series(data_start, data_end)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+
 
         graph_or_tables.append(
             html.Div(

@@ -3,8 +3,8 @@ data/*
 __pycache__/
 **/__pycache/
 .ipynb_checkpoints/
-
 .DS_Store
+notebooks/*.csv
 
 !data/readme.md
 !metadata/readme.md

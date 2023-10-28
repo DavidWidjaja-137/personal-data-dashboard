@@ -206,7 +206,7 @@ def get_statement_keys(statement_source):
     statement_keys = [os.path.join(statement_source.value, file) for file in statement_filenames]
     return statement_keys
 
-def read_all_transactions_from_statement_source( statement_source):
+def read_all_transactions_from_statement_source(statement_source):
 
     statement_keys = get_statement_keys(statement_source)
     

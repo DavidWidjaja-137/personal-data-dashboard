@@ -3,6 +3,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
+BCHYDRO_HOURLY_KWH = 'hourly-bchydro'
+
+class Period(Enum):
+    HOURLY = 0
+    DAILY = 1
+    MONTHLY = 2
 
 class Account(Enum):
     CTFS_CREDIT = 'ctfs-credit'
