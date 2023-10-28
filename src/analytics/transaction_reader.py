@@ -50,6 +50,34 @@ def read_row_from_vancity_chequing(row):
         transaction_type=transaction_type
     )
 
+
+def read_row_from_vancity_savings(row):
+
+    date = datetime.strptime(row[1], "%d-%b-%Y")
+    made_to = str(row[2].strip())
+
+    if row[4] != '':
+        amount = float(row[4])
+        bank_account_flow = AccountFlow.CREDIT
+        transaction_type = FinancialTransactionType.OUTFLOW
+    elif row[5] != '':
+        amount = float(row[5])
+        bank_account_flow = AccountFlow.DEBIT
+        transaction_type = FinancialTransactionType.INFLOW
+    else:
+        amount = 0.0
+        bank_account_flow = AccountFlow.DEBIT
+        transaction_type = FinancialTransactionType.INFLOW
+
+    return FinancialTransaction(
+        date=date,
+        made_to=made_to,
+        amount_cad=abs(amount),
+        bank_account=Account.VANCITY_SAVINGS,
+        bank_account_flow=bank_account_flow,
+        transaction_type=transaction_type
+    )
+
 def read_row_from_scotiabank_credit(row):
     month, day, year = row[0].split('/')
     date = datetime(int(year), int(month), int(day))
@@ -86,6 +114,42 @@ def read_row_from_scotiabank_chequing(row):
         transaction_type=transaction_type
     )
 
+
+def read_row_from_scotiabank_savings(row):
+    date = datetime.fromisoformat(row[0].strip())
+    made_to = str(row[1].strip())
+    amount = float(row[2].replace(',', ''))
+
+    bank_account_flow = AccountFlow.DEBIT if amount > 0 else AccountFlow.CREDIT
+    transaction_type = FinancialTransactionType.INFLOW if amount > 0 else FinancialTransactionType.OUTFLOW
+
+    return FinancialTransaction(
+        date=date,
+        made_to=made_to,
+        amount_cad=abs(amount),
+        bank_account=Account.SCOTIABANK_SAVINGS,
+        bank_account_flow=bank_account_flow,
+        transaction_type=transaction_type
+    )  
+
+
+def read_row_from_credential_asset_management(row):
+    date = datetime.fromisoformat(row[0].strip())
+    made_to = str(row[1].strip())
+    amount = float(row[2].replace(',', ''))
+
+    bank_account_flow = AccountFlow.DEBIT if amount > 0 else AccountFlow.CREDIT
+    transaction_type = FinancialTransactionType.INFLOW if amount > 0 else FinancialTransactionType.OUTFLOW
+
+    return FinancialTransaction(
+        date=date,
+        made_to=made_to,
+        amount_cad=abs(amount),
+        bank_account=Account.CREDENTIAL_ASSET_MANAGEMENT,
+        bank_account_flow=bank_account_flow,
+        transaction_type=transaction_type
+    )  
+
 def read_row_from_ctfs_credit(row):
     date = datetime.fromisoformat(row[0].strip())
     made_to = str(row[1].strip())
@@ -110,10 +174,16 @@ def read_row_from_account(row, statement_source):
         return read_row_from_scotiabank_chequing(row)
     elif statement_source == Account.SCOTIABANK_CREDIT:
         return read_row_from_scotiabank_credit(row)
+    elif statement_source == Account.SCOTIABANK_SAVINGS:
+        return read_row_from_scotiabank_savings(row)
     elif statement_source == Account.VANCITY_CHEQUING:
         return read_row_from_vancity_chequing(row)
     elif statement_source == Account.VANCITY_CREDIT:
         return read_row_from_vancity_credit(row)
+    elif statement_source == Account.VANCITY_SAVINGS:
+        return read_row_from_vancity_savings(row)
+    elif statement_source == Account.CREDENTIAL_ASSET_MANAGEMENT:
+        return read_row_from_credential_asset_management(row)
     else:
         raise ValueError(f"{statement_source} does not exist")
 

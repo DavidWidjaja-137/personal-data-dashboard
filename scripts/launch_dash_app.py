@@ -6,5 +6,8 @@ root_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 
 os.environ["PYTHONPATH"] = os.path.join(root_dir, "src")
 
-notebook_dir = os.path.join(root_dir,"notebooks")
-os.system(f"jupyter lab --notebook-dir={notebook_dir}")
+app_dir = os.path.join(root_dir, "src", "dash_app")
+
+os.chdir(app_dir)
+
+os.system(f"python index.py")

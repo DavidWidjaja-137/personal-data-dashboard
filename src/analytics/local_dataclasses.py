@@ -8,8 +8,12 @@ class Account(Enum):
     CTFS_CREDIT = 'ctfs-credit'
     SCOTIABANK_CHEQUING = 'scotiabank-chequing'
     SCOTIABANK_CREDIT = 'scotiabank-credit'
+    SCOTIABANK_SAVINGS = 'scotiabank-savings'
+    VANCITY_SAVINGS = 'vancity-savings'
     VANCITY_CHEQUING = 'vancity-chequing'
     VANCITY_CREDIT = 'vancity-credit'
+    CREDENTIAL_ASSET_MANAGEMENT = 'credential-asset-management'
+
 
 class AccountFlow(Enum):
     DEBIT = 0

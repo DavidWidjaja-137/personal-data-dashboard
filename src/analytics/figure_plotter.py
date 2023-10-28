@@ -101,6 +101,7 @@ def plot_category_over_time_bar(
 ) -> go.Figure:
     
     category_over_time_dict = transaction_aggregator.get_category_over_time(classified_transactions, data_start, data_end, delta)
+    balance_over_time = transaction_aggregator.get_balance_over_time(classified_transactions, data_start, data_end, delta)
 
     fig = go.Figure()
 
@@ -112,6 +113,10 @@ def plot_category_over_time_bar(
 
     # Change the bar mode
     fig.update_layout(barmode='relative')
+
+    time = [t for t, b in balance_over_time]
+    balance = [b for t, b in balance_over_time]
+    fig.add_trace(go.Scatter(x=time, y=balance, name="Balance"))
     
     return fig
 
@@ -123,6 +128,7 @@ def plot_subcategory_over_time_bar(
 ) -> go.Figure:
     
     category_over_time_dict = transaction_aggregator.get_subcategory_over_time(classified_transactions, data_start, data_end, delta)
+    balance_over_time = transaction_aggregator.get_balance_over_time(classified_transactions, data_start, data_end, delta)
 
     fig = go.Figure()
 
@@ -134,5 +140,10 @@ def plot_subcategory_over_time_bar(
 
     # Change the bar mode
     fig.update_layout(barmode='relative')
+
+    time = [t for t, b in balance_over_time]
+    balance = [b for t, b in balance_over_time]
+    fig.add_trace(go.Scatter(x=time, y=balance, name="Balance"))
+
     
     return fig

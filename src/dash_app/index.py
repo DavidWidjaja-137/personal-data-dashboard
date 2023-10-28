@@ -5,7 +5,9 @@ from dataclasses import dataclass
 from dateutil.relativedelta import relativedelta
 
 from dash import Dash, html, dcc, State, Input, Output, callback
+from dash.dash_table import DataTable
 from analytics import transaction_reader, transaction_classifier, transaction_aggregator, figure_plotter
+from analytics.local_dataclasses import FinancialTransaction, FinancialTransactionType
 
 app = Dash(__name__)
 
@@ -21,7 +23,7 @@ title_banner = html.Header(
 date_picker = dcc.DatePickerRange(
     id='date-picker',
     start_date=datetime(2022, 6, 1),
-    end_date=datetime(2023, 9, 1),
+    end_date=datetime(2023, 10, 1),
     min_date_allowed=date(2022, 5, 1),
     max_date_allowed=date(2024, 1, 1),
     display_format='YYYY-MM-DD',
@@ -30,14 +32,12 @@ date_picker = dcc.DatePickerRange(
 )
 
 view_picker_display_options = [
-    "Monthly Balance Line Plot",
-    "Monthly Categories Line Plot",
-    "Monthly Subcategories Line Plot",
     "Monthly Categories Bar Chart",
     "Monthly Subcategories Bar Chart",
     "Expenditure Categories Pie Chart",
     "Expenditure Subcategories Pie Chart",
-    "Categories Waterfall"
+    "Categories Waterfall",
+    "Transactions Table"
 ]
 
 view_picker_dropdown = dcc.Dropdown(
@@ -93,7 +93,38 @@ layout = html.Div(
     }
 )
 
-# on click the load view buttons, display charts
+def render_transactions_table(classified_transactions: list[FinancialTransaction]) -> DataTable:
+
+    # convert list of dataclasses to list of records.
+    list_of_records: list[dict[str, str]] = []
+    for t in classified_transactions:
+
+        record = {
+            "Date": t.date.strftime("%Y-%m-%d"),
+            "Category": t.category.name,
+            "Subcategory": t.subcategory.name,
+            "Amount": t.amount_cad if t.transaction_type == FinancialTransactionType.INFLOW else -1 * t.amount_cad,
+            "Account": t.bank_account.name,
+            "Description": t.made_to[:50]
+        }
+
+        list_of_records.append(record)
+
+    list_of_columns: list[dict[str, str]] = []
+    list_of_columns.append({"name": "Date", "id": "Date"})
+    list_of_columns.append({"name": "Category", "id": "Category"})
+    list_of_columns.append({"name": "Subcategory", "id": "Subcategory"})
+    list_of_columns.append({"name": "Amount", "id": "Amount"})
+    list_of_columns.append({"name": "Account", "id": "Account"})
+    list_of_columns.append({"name": "Description", "id": "Description"})
+
+    return DataTable(
+        data=list_of_records,
+        columns=list_of_columns,
+        filter_action='native',
+        sort_action='native',
+        page_action='native'
+    )
 
 @callback(
     Output('view-section', 'children'),
@@ -117,40 +148,40 @@ def update_figures(n_click, start_date_str, end_date_str, value):
     if value is None:
         return html.Div()
 
-    graphs = []
+    graph_or_tables = []
     for option in value:
 
-        if option == 'Monthly Balance Line Plot':
-            fig = figure_plotter.plot_balance_over_time(classified_transactions, data_start, data_end, delta=relativedelta(months=1))
-        elif option == 'Monthly Categories Line Plot':
-            fig = figure_plotter.plot_all_categories_over_time(classified_transactions, data_start, data_end, relativedelta(months=1))
-        elif option == 'Monthly Subcategories Line Plot':
-            fig = figure_plotter.plot_all_subcategories_over_time(classified_transactions, data_start, data_end, relativedelta(months=1))
-        elif option == 'Monthly Categories Bar Chart':
+        if option == 'Monthly Categories Bar Chart':
             fig = figure_plotter.plot_category_over_time_bar(classified_transactions, data_start, data_end, relativedelta(months=1))
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Monthly Subcategories Bar Chart':
-            fig = figure_plotter.plot_all_subcategories_over_time(classified_transactions, data_start, data_end, relativedelta(months=1))
+            fig = figure_plotter.plot_subcategory_over_time_bar(classified_transactions, data_start, data_end, relativedelta(months=1))
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Expenditure Categories Pie Chart':
             cd = transaction_aggregator.group_by_category(classified_transactions)
             fig = figure_plotter.plot_expenditures_category_pie_chart(cd)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Expenditure Subcategories Pie Chart':
             csd = transaction_aggregator.group_by_subcategory(classified_transactions)
             fig = figure_plotter.plot_expenditures_subcategory_pie_chart(csd)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Categories Waterfall':
             cd = transaction_aggregator.group_by_category(classified_transactions)
             fig = figure_plotter.plot_category_waterfall(cd)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+        elif option == 'Transactions Table':
+            graph_or_table = render_transactions_table(classified_transactions)
 
-        graphs.append(
+        graph_or_tables.append(
             html.Div(
                 children=[
                     html.H3(option),
-                    dcc.Graph(figure=fig, responsive=True)
+                    graph_or_table
                 ],
-                style={'height': '50vh'}
             )
         )
 
-    view_layout = html.Div(children=graphs)
+    view_layout = html.Div(children=graph_or_tables)
 
     return view_layout
 
