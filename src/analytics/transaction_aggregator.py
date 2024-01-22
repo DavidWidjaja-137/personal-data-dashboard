@@ -15,7 +15,7 @@ balance_key_list = [
     FinancialCategory.INCOME, FinancialCategory.LEARNING, FinancialCategory.BANKING, 
     FinancialCategory.SOCIAL, FinancialCategory.GROCERIES, FinancialCategory.LUXURIES,
     FinancialCategory.UTILITIES, FinancialCategory.CHARITY, FinancialCategory.RENT, 
-    FinancialCategory.SUBSCRIPTIONS, FinancialCategory.UNRECONCILED
+    FinancialCategory.SUBSCRIPTIONS, FinancialCategory.FAMILY, FinancialCategory.UNRECONCILED
 ]
 
 def group_by_category(transactions: list[FinancialTransaction]) -> defaultdict[FinancialCategory, float]:
@@ -76,17 +76,17 @@ def get_waterfall_labels_and_values(cd: defaultdict[FinancialCategory, float]) -
 
     balance = calculate_balance(cd)
 
-    measure = ["relative", "relative", "relative", 
+    measure = ["relative", "relative", "relative", "relative",
                 "relative", "relative", "relative", 
-                "relative", "relative", 
+                "relative", "relative", "relative",
                 "relative", "relative", "total"]
-    x = [FinancialCategory.INCOME.name, FinancialCategory.RENT.name, FinancialCategory.GROCERIES.name,
+    x = [FinancialCategory.INCOME.name, FinancialCategory.RENT.name, FinancialCategory.GROCERIES.name, FinancialCategory.UTILITIES.name,
             FinancialCategory.SOCIAL.name, FinancialCategory.CHARITY.name, FinancialCategory.SUBSCRIPTIONS.name,
-            FinancialCategory.LUXURIES.name, FinancialCategory.LEARNING.name, 
+            FinancialCategory.LUXURIES.name, FinancialCategory.LEARNING.name, FinancialCategory.FAMILY.name,
             FinancialCategory.BANKING.name, FinancialCategory.UNRECONCILED.name, "Balance"]
-    y = [cd[FinancialCategory.INCOME], cd[FinancialCategory.RENT], cd[FinancialCategory.GROCERIES], 
+    y = [cd[FinancialCategory.INCOME], cd[FinancialCategory.RENT], cd[FinancialCategory.GROCERIES], cd[FinancialCategory.UTILITIES], 
             cd[FinancialCategory.SOCIAL], cd[FinancialCategory.CHARITY], cd[FinancialCategory.SUBSCRIPTIONS],
-            cd[FinancialCategory.LUXURIES], cd[FinancialCategory.LEARNING],
+            cd[FinancialCategory.LUXURIES], cd[FinancialCategory.LEARNING], cd[FinancialCategory.FAMILY],
             cd[FinancialCategory.BANKING], cd[FinancialCategory.UNRECONCILED], balance]
     
     return [(m, x1, y1) for m, x1, y1 in zip(measure, x, y)]

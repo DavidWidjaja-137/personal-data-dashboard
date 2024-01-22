@@ -14,10 +14,15 @@ from analytics.local_dataclasses import (
 def read_row_from_vancity_credit(row):
     date = datetime.fromisoformat(row[2].strip())
     made_to = str(row[4].strip())
-    amount = float(row[6])
     
-    bank_account_flow = AccountFlow.CREDIT if amount > 0 else AccountFlow.DEBIT
-    transaction_type = FinancialTransactionType.OUTFLOW if amount > 0 else FinancialTransactionType.INFLOW
+    if row[6] != '':
+        amount = float(row[6])
+        bank_account_flow = AccountFlow.CREDIT
+        transaction_type = FinancialTransactionType.OUTFLOW
+    else:
+        amount = float(row[7])
+        bank_account_flow = AccountFlow.DEBIT
+        transaction_type = FinancialTransactionType.INFLOW
 
     return FinancialTransaction(
         date=date,

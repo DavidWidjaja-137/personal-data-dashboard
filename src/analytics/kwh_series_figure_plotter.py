@@ -35,6 +35,20 @@ def plot_line_chart_of_daily_kwh_series(start: datetime, end: datetime) -> go.Fi
     return fig
 
 
+def plot_line_chart_of_hourly_kwh_series(start: datetime, end: datetime) -> go.Figure:
+
+    series = kwh_series_aggregator.get_kwh_time_series(start, end, Period.HOURLY)
+
+    dates = [d for d, v in series]
+    values = [v for d, v in series]
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(x=dates, y=values, name="Hourly kWh"))
+
+    return fig
+
+
 def plot_month_to_month_comparison_of_daily_kwh_series(start: datetime, end: datetime) -> go.Figure:
 
     dict_of_series = kwh_series_aggregator.get_month_by_month_kwh_series(start, end)

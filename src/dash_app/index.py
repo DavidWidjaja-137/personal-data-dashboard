@@ -29,7 +29,7 @@ title_banner = html.Header(
 date_picker = dcc.DatePickerRange(
     id='date-picker',
     start_date=datetime(2022, 6, 1),
-    end_date=datetime(2023, 10, 1),
+    end_date=datetime(2023, 12, 1),
     min_date_allowed=date(2022, 5, 1),
     max_date_allowed=date(2024, 1, 1),
     display_format='YYYY-MM-DD',
@@ -47,6 +47,7 @@ view_picker_display_options = [
     "Transactions Table",
     "Monthly kWh Bar Chart",
     "Daily kWh Line Chart",
+    "Hourly kWh Line Chart",
     "Month to Month kWh Comparison Line Chart",
     "Week to Week kWh Comparison Line Chart"
 ]
@@ -203,6 +204,10 @@ def update_figures(n_click, height, start_date_str, end_date_str, value):
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Daily kWh Line Chart':
             fig = kwh_series_figure_plotter.plot_line_chart_of_daily_kwh_series(data_start, data_end)
+            fig.update_layout(height=height)
+            graph_or_table = dcc.Graph(figure=fig, responsive=True)
+        elif option == 'Hourly kWh Line Chart':
+            fig = kwh_series_figure_plotter.plot_line_chart_of_hourly_kwh_series(data_start, data_end)
             fig.update_layout(height=height)
             graph_or_table = dcc.Graph(figure=fig, responsive=True)
         elif option == 'Month to Month kWh Comparison Line Chart':
